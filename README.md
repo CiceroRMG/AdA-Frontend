@@ -9,6 +9,10 @@ Este projeto é construído com Vite, React, Tailwind CSS e TypeScript.
 
 ## Como rodar o projeto
 
+### Configure as variáveis de ambiente
+- Crie o arquivo .env
+- Copie o conteúdo de .env.example e cole em .env
+
 ### Usando Docker
 
 1. Navegue até a pasta do projeto:
