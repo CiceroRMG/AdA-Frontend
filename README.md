@@ -18,7 +18,7 @@ Este projeto é construído com Vite, React, Tailwind CSS e TypeScript.
 
 1. Na raiz do projeto, execute:
    ```
-   docker-compose up --build
+   docker compose up --build
    ```
    Isso irá construir a imagem e iniciar o container automaticamente.
 2. Acesse a aplicação no navegador pelo endereço que aparecer no terminal.
