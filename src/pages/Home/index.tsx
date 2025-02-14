@@ -7,42 +7,54 @@ import { Accommodation } from '@/types/accommodation'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { Link } from 'react-router-dom'
+import {
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious
+} from '@/components/ui/pagination'
 
 function Home() {
   const [accommodations, setAccommodations] = useState<Accommodation[]>([])
   const [city, setCity] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [currentPage, setCurrentPage] = useState(1)
+  const totalPages = 2 // mais tarde trocar para o valor real
 
   const apiUrl = import.meta.env.VITE_API_URL
 
-  useEffect(() => {
-    const fetchAccommodations = async () => {
-      setIsLoading(true)
-      try {
-        const response = await fetch(`${apiUrl}/accommodations`)
-        const data: Accommodation[] = await response.json()
-        setAccommodations(data)
-      } catch (error) {
-        console.error('Erro ao buscar acomodações:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchAccommodations()
-  }, [apiUrl])
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const fetchAccommodations = async (page: number, cityParam?: string) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`${apiUrl}/accommodations?city=${encodeURIComponent(city)}`)
+      let url = `${apiUrl}/accommodations?page=${page}`
+      if (cityParam && cityParam.trim() !== '') {
+        url += `&city=${encodeURIComponent(cityParam)}`
+      }
+      const response = await fetch(url)
       const data: Accommodation[] = await response.json()
       setAccommodations(data)
+      // setTotalPages(data.totalPages)
     } catch (error) {
-      console.error('Erro ao buscar acomodações filtradas:', error)
+      console.error('Erro ao buscar acomodações:', error)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  useEffect(() => {
+    fetchAccommodations(currentPage, city || undefined)
+  }, [currentPage])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setCurrentPage(1)
+    fetchAccommodations(1, city)
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
   }
 
   return (
@@ -89,6 +101,42 @@ function Home() {
                 ))
           }
         </div>
+      </div>
+
+      <div className='mt-6'>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                href="#" 
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  if (currentPage > 1) handlePageChange(currentPage - 1) 
+                }}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(page => (
+              <PaginationItem key={page}>
+                <PaginationLink 
+                  href="#"
+                  isActive={currentPage === page}
+                  onClick={(e) => { e.preventDefault(); handlePageChange(page) }}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext 
+                href="#"
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  if (currentPage < totalPages) handlePageChange(currentPage + 1) 
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   )
